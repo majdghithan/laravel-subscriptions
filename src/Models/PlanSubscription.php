@@ -524,6 +524,11 @@ class PlanSubscription extends Model
             return true;
         }
 
+        // added by atm, if there is no usage, it's mean the user can proceed with the action.
+        if ($usage === null) {
+            return true;
+        }
+
         // If the feature value is zero, let's return false since
         // there's no uses available. (useful to disable countable features)
         if (! $usage || $usage->expired() || is_null($featureValue) || $featureValue === '0' || $featureValue === 'false') {
