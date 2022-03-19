@@ -156,7 +156,7 @@ class Plan extends Model implements Sortable
      *
      * @var array
      */
-    protected $rules = [];
+    protected ?array $rules = [];
 
     /**
      * Whether the model should throw a
@@ -164,7 +164,7 @@ class Plan extends Model implements Sortable
      *
      * @var bool
      */
-    protected $throwValidationExceptions = true;
+    protected bool $throwValidationExceptions = true;
 
     /**
      * Create a new Eloquent model instance.
@@ -173,6 +173,7 @@ class Plan extends Model implements Sortable
      */
     public function __construct(array $attributes = [])
     {
+        // todo by ATM added year interval
         $this->setTable(config('rinvex.subscriptions.tables.plans'));
         $this->mergeRules([
             'slug' => 'required|alpha_dash|max:150|unique:'.config('rinvex.subscriptions.tables.plans').',slug',
@@ -183,11 +184,11 @@ class Plan extends Model implements Sortable
             'signup_fee' => 'required|numeric',
             'currency' => 'required|alpha|size:3',
             'trial_period' => 'sometimes|integer|max:100000',
-            'trial_interval' => 'sometimes|in:hour,day,week,month',
+            'trial_interval' => 'sometimes|in:hour,day,week,month,year',
             'invoice_period' => 'sometimes|integer|max:100000',
-            'invoice_interval' => 'sometimes|in:hour,day,week,month',
+            'invoice_interval' => 'sometimes|in:hour,day,week,month,year',
             'grace_period' => 'sometimes|integer|max:100000',
-            'grace_interval' => 'sometimes|in:hour,day,week,month',
+            'grace_interval' => 'sometimes|in:hour,day,week,month,year',
             'sort_order' => 'nullable|integer|max:100000',
             'prorate_day' => 'nullable|integer|max:150',
             'prorate_period' => 'nullable|integer|max:150',

@@ -548,7 +548,11 @@ class PlanSubscription extends Model
      */
     public function getFeatureUsage(string $featureSlug): int
     {
-        $usage = $this->usage()->byFeatureSlug($featureSlug)->first();
+        // todo by ATM
+        // get the usage from the plan, so we dont have to make the slug unique, to ease the creation of plans features
+        // and make the check dynamic across different plans
+        $usage = $this->plan->features()->whereSlug($featureSlug)->first()->usage->first();
+        //$usage = $this->usage()->byFeatureSlug($featureSlug)->first();
 
         return (! $usage || $usage->expired()) ? 0 : $usage->used;
     }
