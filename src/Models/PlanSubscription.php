@@ -518,7 +518,12 @@ class PlanSubscription extends Model
     public function canUseFeature(string $featureSlug): bool
     {
         $featureValue = $this->getFeatureValue($featureSlug);
-        $usage = $this->usage()->byFeatureSlug($featureSlug)->first();
+
+        // todo by ATM
+        // get the usage from the plan, so we dont have to make the slug unique, to ease the creation of plans features
+        // and make the check dynamic across different plans
+        //$usage = $this->usage()->byFeatureSlug($featureSlug)->first();
+        $usage = $this->plan->features()->whereSlug($featureSlug)->first()->usage->first();
 
         if ($featureValue === 'true') {
             return true;
