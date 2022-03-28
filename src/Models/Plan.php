@@ -4,43 +4,43 @@ declare(strict_types=1);
 
 namespace Rinvex\Subscriptions\Models;
 
-use Spatie\Sluggable\SlugOptions;
-use Rinvex\Support\Traits\HasSlug;
-use Spatie\EloquentSortable\Sortable;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Rinvex\Support\Traits\HasSlug;
 use Rinvex\Support\Traits\HasTranslations;
 use Rinvex\Support\Traits\ValidatingTrait;
+use Spatie\EloquentSortable\Sortable;
 use Spatie\EloquentSortable\SortableTrait;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Spatie\Sluggable\SlugOptions;
 
 /**
  * Rinvex\Subscriptions\Models\Plan.
  *
- * @property int                 $id
- * @property string              $slug
- * @property array               $name
- * @property array               $description
- * @property bool                $is_active
- * @property float               $price
- * @property float               $signup_fee
- * @property string              $currency
- * @property int                 $trial_period
- * @property string              $trial_interval
- * @property int                 $invoice_period
- * @property string              $invoice_interval
- * @property int                 $grace_period
- * @property string              $grace_interval
- * @property int                 $prorate_day
- * @property int                 $prorate_period
- * @property int                 $prorate_extend_due
- * @property int                 $active_subscribers_limit
- * @property int                 $sort_order
+ * @property int $id
+ * @property string $slug
+ * @property array $name
+ * @property array $description
+ * @property bool $is_active
+ * @property float $price
+ * @property float $signup_fee
+ * @property string $currency
+ * @property int $trial_period
+ * @property string $trial_interval
+ * @property int $invoice_period
+ * @property string $invoice_interval
+ * @property int $grace_period
+ * @property string $grace_interval
+ * @property int $prorate_day
+ * @property int $prorate_period
+ * @property int $prorate_extend_due
+ * @property int $active_subscribers_limit
+ * @property int $sort_order
  * @property \Carbon\Carbon|null $created_at
  * @property \Carbon\Carbon|null $updated_at
  * @property \Carbon\Carbon|null $deleted_at
- * @property-read \Illuminate\Database\Eloquent\Collection|\Rinvex\Subscriptions\Models\PlanFeature[]      $features
+ * @property-read \Illuminate\Database\Eloquent\Collection|\Rinvex\Subscriptions\Models\PlanFeature[] $features
  * @property-read \Illuminate\Database\Eloquent\Collection|\Rinvex\Subscriptions\Models\PlanSubscription[] $subscriptions
  *
  * @method static \Illuminate\Database\Eloquent\Builder|\Rinvex\Subscriptions\Models\Plan ordered($direction = 'asc')
@@ -169,11 +169,10 @@ class Plan extends Model implements Sortable
     /**
      * Create a new Eloquent model instance.
      *
-     * @param array $attributes
+     * @param  array  $attributes
      */
     public function __construct(array $attributes = [])
     {
-        // todo by ATM added year interval
         $this->setTable(config('rinvex.subscriptions.tables.plans'));
         $this->mergeRules([
             'slug' => 'required|alpha_dash|max:150',
@@ -185,11 +184,11 @@ class Plan extends Model implements Sortable
             'signup_fee' => 'required|numeric',
             'currency' => 'required|alpha|size:3',
             'trial_period' => 'sometimes|integer|max:100000',
-            'trial_interval' => 'sometimes|in:hour,day,week,month,year',
+            'trial_interval' => 'sometimes|in:hour,day,week,month,year',// todo by ATM added year interval
             'invoice_period' => 'sometimes|integer|max:100000',
-            'invoice_interval' => 'sometimes|in:hour,day,week,month,year',
+            'invoice_interval' => 'sometimes|in:hour,day,week,month,year',// todo by ATM added year interval
             'grace_period' => 'sometimes|integer|max:100000',
-            'grace_interval' => 'sometimes|in:hour,day,week,month,year',
+            'grace_interval' => 'sometimes|in:hour,day,week,month,year',// todo by ATM added year interval
             'sort_order' => 'nullable|integer|max:100000',
             'prorate_day' => 'nullable|integer|max:150',
             'prorate_period' => 'nullable|integer|max:150',
@@ -221,9 +220,10 @@ class Plan extends Model implements Sortable
     public function getSlugOptions(): SlugOptions
     {
         return SlugOptions::create()
-                          ->doNotGenerateSlugsOnUpdate()
-                          ->generateSlugsFrom('name')
-                          ->saveSlugsTo('slug');
+            ->doNotGenerateSlugsOnUpdate()
+            ->generateSlugsFrom('name')
+            ->saveSlugsTo('slug')
+            ->allowDuplicateSlugs();
     }
 
     /**
@@ -279,7 +279,7 @@ class Plan extends Model implements Sortable
     /**
      * Get plan feature by the given slug.
      *
-     * @param string $featureSlug
+     * @param  string  $featureSlug
      *
      * @return \Rinvex\Subscriptions\Models\PlanFeature|null
      */

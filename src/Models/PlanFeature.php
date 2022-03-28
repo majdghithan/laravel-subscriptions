@@ -5,35 +5,35 @@ declare(strict_types=1);
 namespace Rinvex\Subscriptions\Models;
 
 use Carbon\Carbon;
-use Spatie\Sluggable\SlugOptions;
-use Rinvex\Support\Traits\HasSlug;
-use Spatie\EloquentSortable\Sortable;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Rinvex\Subscriptions\Services\Period;
+use Rinvex\Subscriptions\Traits\BelongsToPlan;
+use Rinvex\Support\Traits\HasSlug;
 use Rinvex\Support\Traits\HasTranslations;
 use Rinvex\Support\Traits\ValidatingTrait;
+use Spatie\EloquentSortable\Sortable;
 use Spatie\EloquentSortable\SortableTrait;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use Rinvex\Subscriptions\Traits\BelongsToPlan;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Spatie\Sluggable\SlugOptions;
 
 /**
  * Rinvex\Subscriptions\Models\PlanFeature.
  *
- * @property int                 $id
- * @property int                 $plan_id
- * @property string              $slug
- * @property array               $title
- * @property array               $description
- * @property string              $value
- * @property int                 $resettable_period
- * @property string              $resettable_interval
- * @property int                 $sort_order
+ * @property int $id
+ * @property int $plan_id
+ * @property string $slug
+ * @property array $title
+ * @property array $description
+ * @property string $value
+ * @property int $resettable_period
+ * @property string $resettable_interval
+ * @property int $sort_order
  * @property \Carbon\Carbon|null $created_at
  * @property \Carbon\Carbon|null $updated_at
  * @property \Carbon\Carbon|null $deleted_at
- * @property-read \Rinvex\Subscriptions\Models\Plan                                                             $plan
+ * @property-read \Rinvex\Subscriptions\Models\Plan $plan
  * @property-read \Illuminate\Database\Eloquent\Collection|\Rinvex\Subscriptions\Models\PlanSubscriptionUsage[] $usage
  *
  * @method static \Illuminate\Database\Eloquent\Builder|\Rinvex\Subscriptions\Models\PlanFeature byPlanId($planId)
@@ -134,7 +134,7 @@ class PlanFeature extends Model implements Sortable
     /**
      * Create a new Eloquent model instance.
      *
-     * @param array $attributes
+     * @param  array  $attributes
      */
     public function __construct(array $attributes = [])
     {
@@ -173,9 +173,10 @@ class PlanFeature extends Model implements Sortable
     public function getSlugOptions(): SlugOptions
     {
         return SlugOptions::create()
-                          ->doNotGenerateSlugsOnUpdate()
-                          ->generateSlugsFrom('name')
-                          ->saveSlugsTo('slug');
+            ->doNotGenerateSlugsOnUpdate()
+            ->generateSlugsFrom('name')
+            ->saveSlugsTo('slug')
+            ->allowDuplicateSlugs();
     }
 
     /**
@@ -191,7 +192,7 @@ class PlanFeature extends Model implements Sortable
     /**
      * Get feature's reset date.
      *
-     * @param string $dateFrom
+     * @param  string  $dateFrom
      *
      * @return \Carbon\Carbon
      */
