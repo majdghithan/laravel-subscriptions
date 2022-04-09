@@ -265,7 +265,7 @@ class PlanSubscription extends Model
      */
     public function ended(): bool
     {
-        return $this->ends_at ? Carbon::now()->gte($this->ends_at) : false;
+        return $this->ends_at && Carbon::now()->gte($this->ends_at);
     }
 
     /**
@@ -562,6 +562,15 @@ class PlanSubscription extends Model
         $usage = $this->usage()->byFeatureSlug($featureSlug)->first();
 
         return (!$usage || $usage->expired()) ? 0 : $usage->used;
+    }
+
+    public function getFeatureTotalPrice(string $featureSlug): int
+    {
+        // todo by ATM
+        $unitPrice = $this->plan->getFeatureBySlug($featureSlug)->price;
+        $usage     = $this->getFeatureUsage('users');
+
+        return $unitPrice * $usage;
     }
 
     /**
