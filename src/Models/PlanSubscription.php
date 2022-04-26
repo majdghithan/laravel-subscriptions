@@ -568,7 +568,7 @@ class PlanSubscription extends Model
     {
         // todo by ATM
         $unitPrice = $this->plan->getFeatureBySlug($featureSlug)->price;
-        $usage     = $this->getFeatureUsage('users');
+        $usage     = $this->getFeatureUsage($featureSlug);
 
         return $unitPrice * $usage;
     }

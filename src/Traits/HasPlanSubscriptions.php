@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare( strict_types = 1 );
 
 namespace Rinvex\Subscriptions\Traits;
 
@@ -43,7 +43,7 @@ trait HasPlanSubscriptions
      *
      * @return \Illuminate\Database\Eloquent\Relations\MorphMany
      */
-    public function planSubscriptions(): MorphMany
+    public function planSubscriptions() : MorphMany
     {
         return $this->morphMany(config('rinvex.subscriptions.models.plan_subscription'), 'subscriber', 'subscriber_type', 'subscriber_id');
     }
@@ -53,7 +53,7 @@ trait HasPlanSubscriptions
      *
      * @return \Illuminate\Database\Eloquent\Collection
      */
-    public function activePlanSubscriptions(): Collection
+    public function activePlanSubscriptions() : Collection
     {
         return $this->planSubscriptions->reject->inactive();
     }
@@ -65,7 +65,7 @@ trait HasPlanSubscriptions
      *
      * @return \Rinvex\Subscriptions\Models\PlanSubscription|null
      */
-    public function planSubscription(string $subscriptionSlug): ?PlanSubscription
+    public function planSubscription(string $subscriptionSlug) : ?PlanSubscription
     {
         return $this->planSubscriptions()->where('slug', $subscriptionSlug)->first();
     }
@@ -75,7 +75,7 @@ trait HasPlanSubscriptions
      *
      * @return \Illuminate\Database\Eloquent\Collection
      */
-    public function subscribedPlans(): Collection
+    public function subscribedPlans() : Collection
     {
         $planIds = $this->planSubscriptions->reject->inactive()->pluck('plan_id')->unique();
 
@@ -89,7 +89,7 @@ trait HasPlanSubscriptions
      *
      * @return bool
      */
-    public function subscribedTo($planId): bool
+    public function subscribedTo($planId) : bool
     {
         $subscription = $this->planSubscriptions()->where('plan_id', $planId)->first();
 
@@ -99,23 +99,28 @@ trait HasPlanSubscriptions
     /**
      * Subscribe subscriber to a new plan.
      *
-     * @param string                            $subscription
+     * @param string $subscription
      * @param \Rinvex\Subscriptions\Models\Plan $plan
-     * @param \Carbon\Carbon|null               $startDate
+     * @param \Carbon\Carbon|null $startDate
      *
      * @return \Rinvex\Subscriptions\Models\PlanSubscription
      */
-    public function newPlanSubscription($subscription, Plan $plan, Carbon $startDate = null): PlanSubscription
+    public function newPlanSubscription($subscription, Plan $plan, Carbon $startDate = null, array $data = null) : PlanSubscription
     {
-        $trial = new Period($plan->trial_interval, $plan->trial_period, $startDate ?? now());
+        $trial  = new Period($plan->trial_interval, $plan->trial_period, $startDate ?? now());
         $period = new Period($plan->invoice_interval, $plan->invoice_period, $trial->getEndDate());
 
-        return $this->planSubscriptions()->create([
-            'name' => $subscription,
-            'plan_id' => $plan->getKey(),
+        $cratedData = [
+            'name'          => $subscription,
+            'plan_id'       => $plan->getKey(),
             'trial_ends_at' => $trial->getEndDate(),
-            'starts_at' => $period->getStartDate(),
-            'ends_at' => $period->getEndDate(),
-        ]);
+            'starts_at'     => $period->getStartDate(),
+            'ends_at'       => $period->getEndDate(),
+        ];
+        if ($data !== null) {
+            $cratedData = array_merge($cratedData, $data);
+        }
+
+        return $this->planSubscriptions()->create($cratedData);
     }
 }
